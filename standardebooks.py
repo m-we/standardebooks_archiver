@@ -1,8 +1,3 @@
-# m-we
-# v1.0.1 (2018-11-18)
-#
-# Downloads books from standardebooks.org.
-
 import os
 import re
 import urllib.request
