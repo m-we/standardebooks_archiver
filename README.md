@@ -1,0 +1,1 @@
+standardebooks.org formats and publishes ebooks which are public domain in the United States. The Python and Go scripts both crawl the site and download copies of every book. I haven't made them configurable so if you only want one format, you'll have to edit the code a bit, but if you're using these scripts you probably know how to do that.
