@@ -1,45 +1,40 @@
 import os
 import re
+import sys
 import urllib.request
 
-# Returns a list of URLs to books listed on the standardebooks.org website.
-def ScrapeEbooks():
-    ebook_urls = []
-    base_url = "https://standardebooks.org/ebooks/?page="
-    i = 0
-    flag = False
-    while flag == False:
-        i += 1
-        flag = True
-        url = base_url + str(i)
-        print(url)
-        html = urllib.request.urlopen(url).read().decode()
-        for ebook_url in re.findall("/ebooks.*\">", html):
-            ebook_url = ebook_url.replace("\">", "")
-            if ebook_url != "/ebooks/" and ebook_url.find("?") == -1 and ebook_url.find("/ebooks/\"") == -1:
-                ebook_url = "https://standardebooks.org" + ebook_url
-                if not ebook_url in ebook_urls:
-                    ebook_urls.append(ebook_url)
-                    flag = False
-    return ebook_urls
+def find():
+    base_url = 'https://standardebooks.org/ebooks?page='
+    urls = set()
+    page = 1
+    while True:
+        print('Checking page ' + str(page))
+        urls_len = len(urls)
+        resp = urllib.request.urlopen(base_url + str(page)).read().decode()
+        for url in re.findall('/ebooks/.*/.+?">', resp):
+            url = url.replace('">', '').replace('" tabindex="-1','')
+            urls.add('https://standardebooks.org' + url)
+        if len(urls) == urls_len:
+            print('\tdone\n')
+            return urls
+       page += 1
 
-# Passed a list of URLs to standardebooks.org books, finds the download links
-# for .epub, .epub3, and .azw3 files and downloads them.
-def DownloadEbooks(ebook_urls, location):
-    if not os.path.isdir(location):
-        os.makedirs(location)
-    for link in ebook_urls:
-        html = urllib.request.urlopen(link).read().decode()
-        for dl in re.findall("https://standardebooks.org/ebooks/.*(?=\")", html):
-            if dl.endswith(".epub") or dl.endswith(".epub3") or \
-               dl.endswith(".azw3"):
-                print(dl)
-                filename = dl[dl.rfind("/") + 1:]
-                urllib.request.urlretrieve(dl, location + filename)
+def download(urls, frmt, folder):
+    if not os.path.isdir(folder):
+        os.makedirs(folder)
+    for url in urls:
+        resp = urllib.request.urlopen(url).read().decode().replace('\\','')
+        for dlink in re.findall('https://standardebooks.org/ebooks/.*(?=")', resp):
+            if dlink.endswith(frmt):
+                if (frmt == 'epub' or frmt == '.epub') and (dlink.find('kepub') != -1 or dlink.find('_advanced') != -1):
+                    continue
+                
+                print(dlink)
+                fn = folder + os.path.basename(dlink)
+                if not os.path.isfile(fn):
+                    urllib.request.urlretrieve(dlink, fn)
 
-def main():
-    DownloadEbooks(ScrapeEbooks(), "ebooks/")
-    return 0
+if __name__ == '__main__':
+    u = find()
+    download(u, sys.argv[1], sys.argv[2] + '/')
 
-if __name__ == "__main__":
-    main()
