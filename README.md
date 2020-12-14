@@ -4,7 +4,7 @@ standardebooks.org formats and publishes ebooks which are public domain in the U
 `standardebooks.exe FORMAT DOWNLOAD_DIRECTORY`
 
 Example:
-`standardebooks.py epub ebooks/`
+`standardebooks.py epub C:/ebooks/`
 
 Available formats:
 * epub
