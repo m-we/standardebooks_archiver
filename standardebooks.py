@@ -7,21 +7,23 @@ def find():
     base_url = 'https://standardebooks.org/ebooks?page='
     urls = set()
     page = 1
+    
     while True:
-        print('Checking page ' + str(page))
+        print('Checking page ' + str(page), end='\r')
         urls_len = len(urls)
         resp = urllib.request.urlopen(base_url + str(page)).read().decode()
         for url in re.findall('/ebooks/.*/.+?">', resp):
             url = url.replace('">', '').replace('" tabindex="-1','')
             urls.add('https://standardebooks.org' + url)
         if len(urls) == urls_len:
-            print('\tdone\n')
+            print('\n\tdone\n')
             return urls
-       page += 1
+        page += 1
 
 def download(urls, frmt, folder):
     if not os.path.isdir(folder):
         os.makedirs(folder)
+    
     for url in urls:
         resp = urllib.request.urlopen(url).read().decode().replace('\\','')
         for dlink in re.findall('https://standardebooks.org/ebooks/.*(?=")', resp):
@@ -35,6 +37,5 @@ def download(urls, frmt, folder):
                     urllib.request.urlretrieve(dlink, fn)
 
 if __name__ == '__main__':
-    u = find()
-    download(u, sys.argv[1], sys.argv[2] + '/')
+    download(find(), sys.argv[1], sys.argv[2] + '/')
 
